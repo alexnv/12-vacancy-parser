@@ -1,0 +1,4 @@
+pip==23.0.1
+requests==2.28.2
+python-dotenv==0.19.2
+terminaltables==3.1.0
