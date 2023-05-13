@@ -120,14 +120,10 @@ def get_hh_statistics(
     for language in languages:
         vacancies_processed = 0
         salaries_sum = 0
-        for vacancy, vacancy_count in fetch_hh_vacancies(
-                header=header,
-                professional_role_id=professional_role_id,
-                specialization_id=specialization_id,
-                language=language,
-                vacancy_count_per_page=vacancy_count_per_page,
-                area_id=area_id,
-                period=period):
+        hh_vacancies = fetch_hh_vacancies(header=header, professional_role_id=professional_role_id,
+                                       specialization_id=specialization_id, language=language,
+                                       vacancy_count_per_page=vacancy_count_per_page, area_id=area_id, period=period)
+        for vacancy, vacancy_count in hh_vacancies:
             if vacancy:
                 average_rub_salary = predict_rub_salary_hh(vacancy)
                 if average_rub_salary:
@@ -160,13 +156,9 @@ def get_sj_statistics(
     for language in languages:
         vacancies_processed = 0
         salaries_sum = 0
-        for vacancy, vacancy_count in fetch_sj_vacancies(
-                language=language,
-                catalogues_id=catalogues_id,
-                token=token,
-                vacancy_count_per_page=vacancy_count_per_page,
-                town_id=town_id,
-                period=period):
+        sj_vacancies = fetch_sj_vacancies(language=language, catalogues_id=catalogues_id, token=token,
+                                       vacancy_count_per_page=vacancy_count_per_page, town_id=town_id, period=period)
+        for vacancy, vacancy_count in sj_vacanciesЫ:
             if vacancy:
                 average_rub_salary = predict_rub_salary_sj(vacancy)
                 if average_rub_salary:
