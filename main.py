@@ -8,7 +8,7 @@ from terminaltables import AsciiTable
 
 
 def fetch_hh_vacancies(
-        header: str,
+        token: str,
         professional_role_id: int,
         specialization_id: int,
         language: str,
@@ -23,7 +23,7 @@ def fetch_hh_vacancies(
         page_response = requests.get(
             url='https://api.hh.ru/vacancies',
             headers={
-                'User-Agent': header,
+                'Authorization': f"Bearer {token}",
             },
             params={
                 'period': period,
@@ -91,9 +91,8 @@ def predict_salary(
 def predict_rub_salary_hh(vacancy: dict) -> Union[None, int]:
     """Return vacancy's approx salary in rubles for hh.ru."""
     salary = vacancy['salary']
-    if salary:
-        if salary['currency'] == 'RUR':
-            return predict_salary(salary['from'], salary['to'])
+    if salary & salary['currency'] == 'RUR':
+        return predict_salary(salary['from'], salary['to'])
     return None
 
 
@@ -106,7 +105,7 @@ def predict_rub_salary_sj(vacancy: dict) -> Union[int, None]:
 
 def get_hh_statistics(
         languages: list[str],
-        header: str,
+        token: str,
         professional_role_id: int,
         specialization_id: int,
         period: int,
@@ -120,9 +119,9 @@ def get_hh_statistics(
     for language in languages:
         vacancies_processed = 0
         salaries_sum = 0
-        hh_vacancies = fetch_hh_vacancies(header=header, professional_role_id=professional_role_id,
-                                       specialization_id=specialization_id, language=language,
-                                       vacancy_count_per_page=vacancy_count_per_page, area_id=area_id, period=period)
+        hh_vacancies = fetch_hh_vacancies(token=token, professional_role_id=professional_role_id,
+                                          specialization_id=specialization_id, language=language,
+                                          vacancy_count_per_page=vacancy_count_per_page, area_id=area_id, period=period)
         for vacancy, vacancy_count in hh_vacancies:
             if vacancy:
                 average_rub_salary = predict_rub_salary_hh(vacancy)
@@ -157,8 +156,8 @@ def get_sj_statistics(
         vacancies_processed = 0
         salaries_sum = 0
         sj_vacancies = fetch_sj_vacancies(language=language, catalogues_id=catalogues_id, token=token,
-                                       vacancy_count_per_page=vacancy_count_per_page, town_id=town_id, period=period)
-        for vacancy, vacancy_count in sj_vacanciesЫ:
+                                          vacancy_count_per_page=vacancy_count_per_page, town_id=town_id, period=period)
+        for vacancy, vacancy_count in sj_vacancies:
             if vacancy:
                 average_rub_salary = predict_rub_salary_sj(vacancy)
                 if average_rub_salary:
@@ -179,12 +178,12 @@ def get_sj_statistics(
 def create_table(table_name: str, table_content: list) -> str:
     """Create terminal table."""
     table_header = [
-            [
-                'Язык программирования',
-                'Вакансий найдено',
-                'Вакансий обработано',
-                'Средняя зарплата'
-            ]
+        [
+            'Язык программирования',
+            'Вакансий найдено',
+            'Вакансий обработано',
+            'Средняя зарплата'
+        ]
     ]
     table_header.extend(table_content)
     table = AsciiTable(table_header, table_name)
@@ -194,10 +193,10 @@ def create_table(table_name: str, table_content: list) -> str:
 def main() -> None:
     """Print average salary tables for hh.ru and superjob.ru."""
     load_dotenv()
-    header = os.getenv('HH_HEADER')
+    hh_token = os.getenv('HH_TOKEN')
     hh_table_name = 'HeadHunter Moscow'
 
-    token = os.getenv('SJ_TOKEN')
+    sj_token = os.getenv('SJ_TOKEN')
     sj_table_name = 'SuperJob Moscow'
 
     vacancy_count_per_page = 10
@@ -209,7 +208,7 @@ def main() -> None:
 
     hh_statistics = get_hh_statistics(
         languages=programming_languages,
-        header=header,
+        token=hh_token,
         professional_role_id=96,
         specialization_id=1,
         period=30,
@@ -219,7 +218,7 @@ def main() -> None:
     sj_statistics = get_sj_statistics(
         languages=programming_languages,
         catalogues_id=48,
-        token=token,
+        token=sj_token,
         vacancy_count_per_page=vacancy_count_per_page,
         town_id=4,
         period=7
