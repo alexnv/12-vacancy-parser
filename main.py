@@ -123,11 +123,15 @@ def get_hh_statistics(
                                           specialization_id=specialization_id, language=language,
                                           vacancy_count_per_page=vacancy_count_per_page, area_id=area_id, period=period)
         for vacancy, vacancy_count in hh_vacancies:
-            if vacancy:
-                average_rub_salary = predict_rub_salary_hh(vacancy)
-                if average_rub_salary:
-                    vacancies_processed += 1
-                    salaries_sum += average_rub_salary
+            if not vacancy:
+                continue
+
+            average_rub_salary = predict_rub_salary_hh(vacancy)
+            if not average_rub_salary:
+                continue
+
+            vacancies_processed += 1
+            salaries_sum += average_rub_salary
         language_statistics.append(
             [
                 language,
@@ -158,18 +162,21 @@ def get_sj_statistics(
         sj_vacancies = fetch_sj_vacancies(language=language, catalogues_id=catalogues_id, token=token,
                                           vacancy_count_per_page=vacancy_count_per_page, town_id=town_id, period=period)
         for vacancy, vacancy_count in sj_vacancies:
-            if vacancy:
-                average_rub_salary = predict_rub_salary_sj(vacancy)
-                if average_rub_salary:
-                    vacancies_processed += 1
-                    salaries_sum += average_rub_salary
+            if not vacancy:
+                continue
+
+            average_rub_salary = predict_rub_salary_sj(vacancy)
+            if not average_rub_salary:
+                continue
+
+            vacancies_processed += 1
+            salaries_sum += average_rub_salary
         language_statistics.append(
             [
                 language,
                 vacancy_count,
                 vacancies_processed,
-                int(salaries_sum / vacancies_processed if
-                    vacancies_processed > 0 else 0)
+                int(salaries_sum / max(vacancies_processed, 0))
             ]
         )
     return language_statistics
