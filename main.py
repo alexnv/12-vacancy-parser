@@ -137,7 +137,7 @@ def get_hh_statistics(
                 language,
                 vacancy_count,
                 vacancies_processed,
-                max(int(salaries_sum / vacancies_processed), 0)
+                int((salaries_sum / vacancies_processed) if vacancies_processed > 0 else 0)
             ]
         )
     return language_statistics
@@ -175,7 +175,7 @@ def get_sj_statistics(
                 language,
                 vacancy_count,
                 vacancies_processed,
-                max(int(salaries_sum / vacancies_processed), 0)
+                int((salaries_sum / vacancies_processed) if vacancies_processed > 0 else 0)
             ]
         )
     return language_statistics
